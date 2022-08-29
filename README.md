@@ -22,8 +22,9 @@ I always try to work new best practices or frameworks into each project I start;
 
 In keeping with the spirit of better communication above, I've decided to build an actual logging system into this project. This isn't something I've read into how to do well yet, but I'm hoping that the simple nature of this API will lend itself to an easy first dive into logging.
 
-## 
-# Project Model
+# About the Code
+
+## Project Model
 
 The `Project` model consists of all the information I need to display information about my personal software projects:
 
