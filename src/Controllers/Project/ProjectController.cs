@@ -7,9 +7,12 @@ namespace ProjectsWebApi.Controllers;
 [Route("api/project")]
 public class ProjectController : ControllerBase
 {
-    public ProjectController()
+
+    private readonly IProjectService service;
+
+    public ProjectController(IProjectService service)
     {
-        
+        this.service = service;
     }
 
     [HttpGet]
@@ -17,11 +20,11 @@ public class ProjectController : ControllerBase
     {
         try
         {
-            return Ok();
+            return Ok(service.GetAll());
         }
         catch
         {
-            return BadRequest();
+            return BadRequest("Something went wrong!");
         }
     }
 }
