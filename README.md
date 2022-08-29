@@ -35,3 +35,96 @@ The `Project` model consists of all the information I need to display informatio
 - Short and Long Descriptions -- short for a quick summary, like a sub-title; long for a full section on my 'My Projects' page
 - Technologies -- a quick list of what tech was used to build it
 - Site and Source -- links to the project's site / source code
+
+## Repository
+
+The repository (`IProjectRepository` / `ProjectRepository`) are built to make manual calls to a MySql database.
+
+In order to do this, a `ConnectionString` must be established. This is done by reading certain environmental variables, then building the string at runtime. Those environmental variables must be established before compiling.
+
+**In development, I suggest using dotnet user-secrets to do this:**
+- `dotnet user-secrets init` to initialize user-secrets
+- Take note of the following values:
+    - **server**: the address of the server running MySql that we will use -- usually just `localhost` in development
+    - **port**: MySql uses `3306` by default
+    - **database**: the name of the database this application will use
+    - **user**: the username of the user that the application will log in as -- recommend creating a user that only has privileges on the one database
+    - **password**: the password for that user
+- Create the following secrets:
+    - `dotnet user-secrets set MySql:Server {server}`
+    - `dotnet user-secrets set MySql:Port {port}`
+    - `dotnet user-secrets set MySql:Database {database}`
+    - `dotnet user-secrets set MySql:User {user}`
+    - `dotnet user-secrets set MySql:Password {password}`
+
+In production, the following environmental variables must be established:
+
+- `MYSQL_SERVER`
+- `MYSQL_PORT`
+- `MYSQL_DATABASE`
+- `MYSQL_USER`
+- `MYSQL_PASSWORD`
+
+These can be established via any method. If using Docker and docker compose, they can be passed from the docker-compose.yml, to the Dockerfile, and then to environmental variables.
+
+## Database
+
+This project makes manual calls to a MySql database. The database consists of three tables, which can be created via the following schema:
+
+**Main Projects Table:**
+
+```
+CREATE TABLE IF NOT EXISTS `projects` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` tinytext,
+  `short_description` text,
+  `long_description` text,
+  `site` text,
+  `source` text,
+  PRIMARY KEY (`id`)
+  );
+```
+
+**Technologies Table:**
+
+```
+CREATE TABLE IF NOT EXISTS `technologies` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` tinytext,
+  PRIMARY KEY (`id`)
+);
+```
+
+**Project Technologies Join Table:**
+```
+CREATE TABLE IF NOT EXISTS `project_technologies` (
+  `project_id` int NOT NULL,
+  `technology_id` int NOT NULL,
+  PRIMARY KEY (`project_id`,`technology_id`)
+);
+```
+
+Table schemas should be saved in `appsettings.json`, where they will be accessed at runtime. The repositories will then use this to create tables if they are not already present. A section in `appsettings` should be formatted like this:
+
+```
+"TableSchemasConfiguration": {
+    "TableSchemas": {
+      "{Projects}": [
+        {
+          "Name": "{projects}",
+          "Schema": "{testschema}"
+        },
+        {
+          "Name": "{technologies}",
+          "Schema": "{testschema}"
+        },
+        {
+          "Name": "{project_technologies}",
+          "Schema": "{testschema}"
+        }
+      ]
+    }
+  }
+```
+
+Curly brackets denote arbitrary strings, otherwise the string must be *exactly as written* for ASP.NET to map the JSON to the object correctly.

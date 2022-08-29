@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProjectsWebApi.Models;
+using ProjectsWebApi.Services;
 
 namespace ProjectsWebApi.Controllers;
 
@@ -20,7 +21,7 @@ public class ProjectController : ControllerBase
     {
         try
         {
-            return Ok(service.GetAll());
+            return Ok(service.GetAllProjects());
         }
         catch
         {

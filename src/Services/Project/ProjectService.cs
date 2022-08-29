@@ -1,3 +1,6 @@
+using ProjectsWebApi.Models;
+using ProjectsWebApi.Repositories;
+
 namespace ProjectsWebApi.Services;
 
 public class ProjectService : IProjectService
