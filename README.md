@@ -6,9 +6,9 @@ A web api for storing information about the projects I am working on, mainly use
 For this project, I am focusing on improving in the following areas:
 
 ## Documentation
-I'm beginning to realize the importance of good documentation. It's not just so that an imaginary third party can understand my code; honestly I don't expect many people to ever visit see this. It's important because it will help myself later.
+I'm beginning to realize the importance of good documentation. It's not just so that an imaginary third party can understand my code; honestly I don't expect many people to ever visit or see this. It's important because it will help myself later.
 
-There are so many small things I learn, especially when setting up a project, and not all of it is obvious just looking at the source code.
+There are so many small things I learn, especially when setting up a project, and not all of it is obvious just looking at the source code. I am tired of going through my own google search history to try and re-figure out the what and why of my not-even-that-old code.
 
 Recently, I wrote a paragraph in a project's readme detailing how I set up dotnet secrets to store information needed to connect to the database in development. At the time, I was thinking *who am I kidding, no one is ever going to read this, and if they do, they won't need this explanation anyway.*
 
