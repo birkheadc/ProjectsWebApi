@@ -24,7 +24,7 @@ In keeping with the spirit of better communication above, I've decided to build 
 
 # About the Code
 
-This is a very standard CRUD repository, with a few simple API endpoints for manipulating a single table on a single database I will use this API to update and display information regarding my personal projects on my website, a place to show off what I'm working on.
+This is a very standard CRUD repository, with a few simple API endpoints for manipulating a single table on a single database. I will use this API to update and display information regarding my personal projects on my website, a place to show off what I'm working on.
 
 ## Model
 
