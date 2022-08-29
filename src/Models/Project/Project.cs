@@ -2,6 +2,8 @@ namespace ProjectsWebApi.Models;
 
 public record Project
 {
+    ///<summary>Unique id of the project, used for the database, and as a key for iterating in React.</summary>
+    public Guid Id { get; set; }
     ///<summary>The name of the project.</summary>
     public string Name { get; set; }
     ///<summary>A short description of the project.</summary>
