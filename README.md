@@ -90,8 +90,9 @@ CREATE TABLE IF NOT EXISTS `projects` (
 ```
 CREATE TABLE IF NOT EXISTS `technologies` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `name` tinytext,
-  PRIMARY KEY (`id`)
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 );
 ```
 
@@ -100,7 +101,10 @@ CREATE TABLE IF NOT EXISTS `technologies` (
 CREATE TABLE IF NOT EXISTS `project_technologies` (
   `project_id` int NOT NULL,
   `technology_id` int NOT NULL,
-  PRIMARY KEY (`project_id`,`technology_id`)
+  PRIMARY KEY (`project_id`,`technology_id`),
+  KEY `technology_id` (`technology_id`),
+  CONSTRAINT `project_technologies_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
+  CONSTRAINT `project_technologies_ibfk_2` FOREIGN KEY (`technology_id`) REFERENCES `technologies` (`id`)
 );
 ```
 
@@ -127,4 +131,4 @@ Table schemas should be saved in `appsettings.json`, where they will be accessed
   }
 ```
 
-Curly brackets denote arbitrary strings, otherwise the string must be *exactly as written* for ASP.NET to map the JSON to the object correctly.
+Curly brackets denote arbitrary strings, otherwise the string must be *exactly as written* for ASP.NET to map the JSON to the object correctly. Even the arbitrary strings, however, are hard-coded in the related Repository classes, so care should be taken to make sure they match.
