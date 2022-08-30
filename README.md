@@ -75,7 +75,7 @@ This project makes manual calls to a MySql database. The database consists of th
 
 ```
 CREATE TABLE IF NOT EXISTS `projects` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` VARCHAR(36) NOT NULL,
   `name` tinytext,
   `short_description` text,
   `long_description` text,
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
 
 ```
 CREATE TABLE IF NOT EXISTS `technologies` (
-  `id` int NOT NULL AUTO_INCREMENT,
+  `id` VARCHAR(36) NOT NULL,
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
@@ -99,8 +99,8 @@ CREATE TABLE IF NOT EXISTS `technologies` (
 **Project Technologies Join Table:**
 ```
 CREATE TABLE IF NOT EXISTS `project_technologies` (
-  `project_id` int NOT NULL,
-  `technology_id` int NOT NULL,
+  `project_id` VARCHAR(36) NOT NULL,
+  `technology_id` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`project_id`,`technology_id`),
   KEY `technology_id` (`technology_id`),
   CONSTRAINT `project_technologies_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
