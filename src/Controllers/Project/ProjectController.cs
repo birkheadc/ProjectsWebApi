@@ -28,4 +28,18 @@ public class ProjectController : ControllerBase
             return BadRequest("Something went wrong!");
         }
     }
+
+    [HttpPost]
+    public IActionResult InsertProject(ProjectIncoming project)
+    {
+        try
+        {
+            service.AddProject(project);
+            return Ok();
+        }
+        catch
+        {
+            return BadRequest("Something went wrong!");
+        }
+    }
 }

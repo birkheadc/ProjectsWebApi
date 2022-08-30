@@ -13,6 +13,16 @@ public class ProjectService : IProjectService
         this.repository = repository;
     }
 
+    public void AddProject(ProjectIncoming project)
+    {
+        repository.Insert(project);
+    }
+
+    public void AddProjects(IEnumerable<ProjectIncoming> projects)
+    {
+        repository.InsertRange(projects);
+    }
+
     public IEnumerable<Project> GetAllProjects()
     {
         return repository.FindAll();

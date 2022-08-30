@@ -8,7 +8,6 @@ public abstract class RepositoryBase
     protected string connectionString;
     public RepositoryBase(DatabaseConnectionConfig connectionConfig)
     {
-        // Todo: Initialize the database / confirm it is properly initialized.
         this.connectionConfig = connectionConfig;
         connectionString = connectionConfig.GetConnectionString();
     }
@@ -25,9 +24,19 @@ public abstract class RepositoryBase
             throw new Exception("Fatal Error: Could not connect to database!");
         }
     }
+    
+    ///<summary>Initializes tables based on the supplied schema. Should be called from the constructor of the individual repository/</summary>
+    internal void InitializeTables(IEnumerable<TableSchema> schemas)
+    {
+        foreach (TableSchema schema in schemas)
+        {
+            InitializeTable(schema);
+        }
+    }
 
     internal void InitializeTable(TableSchema schema)
     {
+        // Not sure if anything else needs to be done, at the moment "Initialize" simply calls "Create".
         CreateTable(schema.Schema);
     }
 
