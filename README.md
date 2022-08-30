@@ -57,7 +57,7 @@ In order to do this, a `ConnectionString` must be established. This is done by r
     - `dotnet user-secrets set MySql:User {user}`
     - `dotnet user-secrets set MySql:Password {password}`
 
-In production, the following environmental variables must be established:
+**In production, the following environmental variables must be established:**
 
 - `MYSQL_SERVER`
 - `MYSQL_PORT`
