@@ -116,15 +116,15 @@ Table schemas should be saved in `appsettings.json`, where they will be accessed
       "{Projects}": [
         {
           "Name": "{projects}",
-          "Schema": "{testschema}"
+          "Schema": "{schema}"
         },
         {
           "Name": "{technologies}",
-          "Schema": "{testschema}"
+          "Schema": "{schema}"
         },
         {
           "Name": "{project_technologies}",
-          "Schema": "{testschema}"
+          "Schema": "{schema}"
         }
       ]
     }
