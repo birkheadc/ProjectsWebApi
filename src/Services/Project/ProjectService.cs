@@ -15,12 +15,12 @@ public class ProjectService : IProjectService
 
     public void AddProject(ProjectIncoming project)
     {
-        repository.Insert(project);
+        repository.Insert(ProjectConverter.ToEntity(project));
     }
 
     public void AddProjects(IEnumerable<ProjectIncoming> projects)
     {
-        repository.InsertRange(projects);
+        repository.InsertRange(ProjectConverter.ToEntity(projects));
     }
 
     public IEnumerable<Project> GetAllProjects()
