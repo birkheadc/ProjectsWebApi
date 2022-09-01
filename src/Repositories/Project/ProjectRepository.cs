@@ -15,9 +15,53 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
     {
         List<Project> projects = new();
 
-        // Todo
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "SELECT * FROM projects;";
+
+            connection.Open();
+            using (MySqlDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Project project = GetProjectFromReader(reader);
+                    projects.Add(project);
+                }
+            }
+            connection.Close();
+        }
+
+        foreach (Project project in projects)
+        {
+            project.Technologies = FindAllTechnologiesOfProject(project.Id);
+        }
 
         return projects;
+    }
+
+    private string[] FindAllTechnologiesOfProject(Guid projectId)
+    {
+        List<string> technologies = new();
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "SELECT technology_name FROM technologies WHERE technology_id IN (SELECT technology_id FROM project_technologies WHERE project_id=@project_id)";
+            command.Parameters.AddWithValue("@project_id", projectId.ToString());
+            connection.Open();
+            using (MySqlDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    technologies.Add(reader["technology_name"].ToString() ?? "");
+                }
+            }
+            connection.Close();
+        }
+
+        return technologies.ToArray();
     }
 
     ///<summary>Inserts the Project into the database. Because there is a many-to-many relationship between Projects and Technologies, this requires a few steps.</summary>
@@ -46,7 +90,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             MySqlCommand command = new();
             command.Connection = connection;
             StringBuilder sb = new();
-            sb.Append("INSERT IGNORE INTO technologies (id, name) VALUES ");
+            sb.Append("INSERT IGNORE INTO technologies (technology_id, technology_name) VALUES ");
 
             // Todo: Comment / refactor this code
             List<MySqlParameter> parameters = new();
@@ -79,7 +123,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            command.CommandText = $"INSERT INTO projects (id, name, short_description, long_description, site, source) values (@id, @name, @shortDesc, @longDesc, @site, @source)";
+            command.CommandText = $"INSERT INTO projects (project_id, project_name, short_description, long_description, site, source) values (@id, @name, @shortDesc, @longDesc, @site, @source)";
             command.Parameters.AddWithValue("@id", project.Id);
             command.Parameters.AddWithValue("@name", project.Name);
             command.Parameters.AddWithValue("@shortDesc", project.ShortDescription);
@@ -100,7 +144,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             MySqlCommand command = new();
             command.Connection = connection;
             StringBuilder sb = new();
-            sb.Append("INSERT INTO project_technologies (project_id, technology_id) SELECT @project_id, id FROM technologies WHERE name IN (");
+            sb.Append("INSERT INTO project_technologies (project_id, technology_id) SELECT @project_id, technology_id FROM technologies WHERE technology_name IN (");
 
             // Todo: Comment / refactor this code
             List<MySqlParameter> parameters = new();
@@ -109,6 +153,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
                 string p = "@p_"+i;
                 sb.Append($"{p}, ");
                 MySqlParameter parameter = new(p, technologies[i]);
+                Console.WriteLine($"{p} == {technologies[i]}");
                 parameters.Add(parameter);
             }
             sb.Length -= 2;
@@ -116,6 +161,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
 
             command.Parameters.AddRange(parameters.ToArray());
             command.Parameters.AddWithValue("@project_id", id.ToString());
+            Console.WriteLine($"@project_id == {id.ToString()}");
             command.CommandText = sb.ToString();
 
             Console.WriteLine($"Executing code: {sb.ToString()}");
@@ -124,5 +170,20 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             command.ExecuteNonQuery();
             connection.Close();
         }
+    }
+
+    private Project GetProjectFromReader(MySqlDataReader reader)
+    {
+        Project project = new()
+        {
+            Id = Guid.Parse(reader["project_id"].ToString() ?? ""),
+            Name = reader["project_name"].ToString() ?? "",
+            ShortDescription = reader["short_description"].ToString() ?? "",
+            LongDescription = reader["long_description"].ToString() ?? "",
+            // Technologies are built with another query later
+            Site = reader["site"].ToString() ?? "",
+            Source = reader["source"].ToString() ?? ""
+        };
+        return project;
     }
 }

@@ -24,7 +24,7 @@ public abstract class RepositoryBase
             throw new Exception("Fatal Error: Could not connect to database!");
         }
     }
-    
+
     ///<summary>Initializes tables based on the supplied schema. Should be called from the constructor of the individual repository/</summary>
     internal void InitializeTables(IEnumerable<TableSchema> schemas)
     {

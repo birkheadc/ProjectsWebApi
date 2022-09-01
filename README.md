@@ -59,13 +59,25 @@ In order to do this, a `ConnectionString` must be established. This is done by r
 
 **In production, the following environmental variables must be established:**
 
-- `MYSQL_SERVER`
-- `MYSQL_PORT`
-- `MYSQL_DATABASE`
-- `MYSQL_USER`
-- `MYSQL_PASSWORD`
+- `ASPNETCORE_MYSQL_SERVER`
+- `ASPNETCORE_MYSQL_PORT`
+- `ASPNETCORE_MYSQL_DATABASE`
+- `ASPNETCORE_MYSQL_USER`
+- `ASPNETCORE_MYSQL_PASSWORD`
 
 These can be established via any method. If using Docker and docker compose, they can be passed from the docker-compose.yml, to the Dockerfile, and then to environmental variables.
+
+If not using docker compose, the arguments must be passed to the Docker build command via --build-arg. In the current Dockerfile, the Dockerfile arguments are the same as the environmental variables, but without the `ASPNETCORE_` header. For example:
+
+```
+docker build -t projects:staging \
+--build-arg MYSQL_SERVER=localhost \
+--build-arg MYSQL_PORT=3306 \
+--build-arg MYSQL_DATABASE=projects \
+--build-arg MYSQL_USER=user \
+--build-arg MYSQL_PASSWORD=passw0rd \
+.
+```
 
 ## Database
 
@@ -75,13 +87,13 @@ This project makes manual calls to a MySql database. The database consists of th
 
 ```
 CREATE TABLE IF NOT EXISTS `projects` (
-  `id` VARCHAR(36) NOT NULL,
-  `name` tinytext,
+  `project_id` VARCHAR(36) NOT NULL,
+  `project_name` tinytext,
   `short_description` text,
   `long_description` text,
   `site` text,
   `source` text,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`project_id`)
   );
 ```
 
@@ -89,10 +101,10 @@ CREATE TABLE IF NOT EXISTS `projects` (
 
 ```
 CREATE TABLE IF NOT EXISTS `technologies` (
-  `id` VARCHAR(36) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+  `technology_id` VARCHAR(36) NOT NULL,
+  `technology_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`technology_id`),
+  UNIQUE KEY `technology_name` (`technology_name`)
 );
 ```
 
@@ -103,8 +115,8 @@ CREATE TABLE IF NOT EXISTS `project_technologies` (
   `technology_id` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`project_id`,`technology_id`),
   KEY `technology_id` (`technology_id`),
-  CONSTRAINT `project_technologies_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`),
-  CONSTRAINT `project_technologies_ibfk_2` FOREIGN KEY (`technology_id`) REFERENCES `technologies` (`id`)
+  CONSTRAINT `project_technologies_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`),
+  CONSTRAINT `project_technologies_ibfk_2` FOREIGN KEY (`technology_id`) REFERENCES `technologies` (`technology_id`)
 );
 ```
 

@@ -16,11 +16,11 @@ else
 {
     connectionConfig = new()
     {
-        Server = Environment.GetEnvironmentVariable("MYSQL_SERVER") ?? "",
-        Port = Int32.Parse(Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "0"),
-        Database = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "",
-        User = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "",
-        Password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? ""
+        Server = Environment.GetEnvironmentVariable("ASPNETCORE_MYSQL_SERVER") ?? "",
+        Port = Int32.Parse(Environment.GetEnvironmentVariable("ASPNETCORE_MYSQL_PORT") ?? "0"),
+        Database = Environment.GetEnvironmentVariable("ASPNETCORE_MYSQL_DATABASE") ?? "",
+        User = Environment.GetEnvironmentVariable("ASPNETCORE_MYSQL_USER") ?? "",
+        Password = Environment.GetEnvironmentVariable("ASPNETCORE_MYSQL_PASSWORD") ?? ""
     };
 }
 
