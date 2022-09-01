@@ -79,7 +79,7 @@ docker build -t projects:staging \
 .
 ```
 
-If running in a container, connecting to a MySql server can be slightly more difficult. If the application looks for a MySql server on localhost, it will search inside it's container and likely not find anything. I recommend building another container for the MySql server, and connecting the two containers via a docker network. Then give the name of the MySql container as the MYSQL_SERVER.
+If running in a container, connecting to a MySql server can be slightly more difficult. If the application looks for a MySql server on localhost, it will search inside its container and likely not find anything. I recommend building another container for the MySql server, and connecting the two containers via a docker network. Then give the name of the MySql container as the MYSQL_SERVER.
 
 ## Database
 
