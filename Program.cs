@@ -11,6 +11,7 @@ DatabaseConnectionConfig connectionConfig;
 if (builder.Environment.IsDevelopment() == true)
 {
     connectionConfig = builder.Configuration.GetSection("MySql").Get<DatabaseConnectionConfig>();
+    Environment.SetEnvironmentVariable("ASPNETCORE_PASSWORD", builder.Configuration["Password"]);
 }
 else
 {

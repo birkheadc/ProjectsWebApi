@@ -40,7 +40,7 @@ The `Project` model consists of all the information I need to display informatio
 
 The repository (`IProjectRepository` / `ProjectRepository`) are built to make manual calls to a MySql database.
 
-In order to do this, a `ConnectionString` must be established. This is done by reading certain environmental variables, then building the string at runtime. Those environmental variables must be established before compiling.
+In order to do this, a `ConnectionString` must be established. This is done by reading certain environment variables, then building the string at runtime. Those environment variables must be established before compiling.
 
 **In development, I suggest using dotnet user-secrets to do this:**
 - `dotnet user-secrets init` to initialize user-secrets
@@ -57,7 +57,7 @@ In order to do this, a `ConnectionString` must be established. This is done by r
     - `dotnet user-secrets set MySql:User {user}`
     - `dotnet user-secrets set MySql:Password {password}`
 
-**In production, the following environmental variables must be established:**
+**In production, the following environment variables must be established:**
 
 - `ASPNETCORE_MYSQL_SERVER`
 - `ASPNETCORE_MYSQL_PORT`
@@ -65,9 +65,9 @@ In order to do this, a `ConnectionString` must be established. This is done by r
 - `ASPNETCORE_MYSQL_USER`
 - `ASPNETCORE_MYSQL_PASSWORD`
 
-These can be established via any method. If using Docker and docker compose, they can be passed from the docker-compose.yml, to the Dockerfile, and then to environmental variables.
+These can be established via any method. If using Docker and docker compose, they can be passed from the docker-compose.yml, to the Dockerfile, and then to environment variables.
 
-If not using docker compose, the arguments must be passed to the Docker build command via --build-arg. In the current Dockerfile, the Dockerfile arguments are the same as the environmental variables, but without the `ASPNETCORE_` header. For example:
+If not using docker compose, the arguments must be passed to the Docker build command via --build-arg. In the current Dockerfile, the Dockerfile arguments are the same as the environment variables, but without the `ASPNETCORE_` header. For example:
 
 ```
 docker build -t projects:staging \
@@ -147,3 +147,16 @@ Table schemas should be saved in `appsettings.json`, where they will be accessed
 ```
 
 Curly brackets denote arbitrary strings, otherwise the string must be *exactly as written* for ASP.NET to map the JSON to the object correctly. Even the arbitrary strings, however, are hard-coded in the related Repository classes, so care should be taken to make sure they match.
+
+# Security
+
+This app simply checks a password supplied by the user against an internal password held in an environment variable. This is not very secure but this app is not meant to be very secure. It is just a simple single step to prevent random people from modifying the database.
+
+In development:
+
+`dotnet user-secrets set Password {password}`
+
+In production, use the same method as when setting up the database variables:
+`--build-arg PASSWORD={password}`
+
+Use a random string as a password. Store that string in the database of the app that you use to update this app. Use a correctly hashed and secured password that you physically type into that app, to retrieve this app's password.

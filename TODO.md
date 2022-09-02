@@ -16,3 +16,7 @@
 
 # Error handling
 - A while back I attempted to build error-handling middleware but was unsuccessful. I should try again.
+
+# Authorization
+
+- Only my authorized apps should have access to the API, so I need a method for authorizing them.

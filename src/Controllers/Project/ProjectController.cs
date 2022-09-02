@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ProjectsWebApi.Filters;
 using ProjectsWebApi.Models;
 using ProjectsWebApi.Services;
 
@@ -40,6 +41,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPost]
+    [PasswordAuth]
     public IActionResult InsertProject(ProjectIncoming project)
     {
         try
@@ -55,6 +57,7 @@ public class ProjectController : ControllerBase
 
     [HttpPost]
     [Route("debug")]
+    [PasswordAuth]
     public IActionResult DEBUG_PopulateDatabase()
     {
         List<ProjectIncoming> projects = new();
