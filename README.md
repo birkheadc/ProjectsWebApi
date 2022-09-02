@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `long_description` text,
   `site` text,
   `source` text,
+  `is_favorite` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`project_id`)
   );
 ```

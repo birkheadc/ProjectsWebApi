@@ -12,7 +12,8 @@ public static class ProjectConverter
             LongDescription = incoming.LongDescription,
             Technologies = incoming.Technologies,
             Site = incoming.Site,
-            Source = incoming.Source
+            Source = incoming.Source,
+            IsFavorite = incoming.IsFavorite
         };
         return project;
     }

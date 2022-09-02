@@ -68,7 +68,8 @@ public class ProjectController : ControllerBase
                 "unity"
             },
             Site = "game.birkheadc.me",
-            Source = "https://github.com/stars/birkheadc/lists/game"
+            Source = "https://github.com/stars/birkheadc/lists/game",
+            IsFavorite = false
         });
         projects.Add(new ProjectIncoming()
         {
@@ -81,7 +82,8 @@ public class ProjectController : ControllerBase
                 "javascript"
             },
             Site = "bookkeeper.birkheadc.me",
-            Source = "https://github.com/stars/birkheadc/lists/bookkeeperlist"
+            Source = "https://github.com/stars/birkheadc/lists/bookkeeperlist",
+            IsFavorite = true
         });
         try
         {

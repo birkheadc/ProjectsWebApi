@@ -14,6 +14,6 @@ public record ProjectIncoming
     public string Site { get; set; }
     ///<summary>Link to the source code for the project.</summary>
     public string Source { get; set; }
-
-    
+    ///<summary>Whether the project is marked favorite or not.</summary>
+    public bool IsFavorite { get; set; }
 }

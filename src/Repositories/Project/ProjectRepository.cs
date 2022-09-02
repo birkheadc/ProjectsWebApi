@@ -123,13 +123,14 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            command.CommandText = $"INSERT INTO projects (project_id, project_name, short_description, long_description, site, source) values (@id, @name, @shortDesc, @longDesc, @site, @source)";
+            command.CommandText = $"INSERT INTO projects (project_id, project_name, short_description, long_description, site, source, is_favorite) values (@id, @name, @shortDesc, @longDesc, @site, @source, @isFavorite)";
             command.Parameters.AddWithValue("@id", project.Id);
             command.Parameters.AddWithValue("@name", project.Name);
             command.Parameters.AddWithValue("@shortDesc", project.ShortDescription);
             command.Parameters.AddWithValue("@longDesc", project.LongDescription);
             command.Parameters.AddWithValue("@site", project.Site);
             command.Parameters.AddWithValue("@source", project.Source);
+            command.Parameters.AddWithValue("@isFavorite", project.IsFavorite ? 1 : 0);
 
             connection.Open();
             command.ExecuteNonQuery();
@@ -182,7 +183,8 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             LongDescription = reader["long_description"].ToString() ?? "",
             // Technologies are built with another query later
             Site = reader["site"].ToString() ?? "",
-            Source = reader["source"].ToString() ?? ""
+            Source = reader["source"].ToString() ?? "",
+            IsFavorite = Boolean.Parse(reader["is_favorite"].ToString())
         };
         return project;
     }
