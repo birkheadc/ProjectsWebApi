@@ -19,6 +19,13 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet]
+    [Route("debug")]
+    public IActionResult Debug()
+    {
+        return Ok();
+    }
+
+    [HttpGet]
     public IActionResult GetAll()
     {
         logger.LogDebug("Request received: GetAll");
