@@ -160,3 +160,7 @@ In production, use the same method as when setting up the database variables:
 `--build-arg PASSWORD={password}`
 
 Use a random string as a password. Store that string in the database of the app that you use to update this app. Use a correctly hashed and secured password that you physically type into that app, to retrieve this app's password.
+
+# Logging
+
+This app uses Serilog for logging. // Todo: Write this section.
