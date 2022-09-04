@@ -5,10 +5,11 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.AddSerilog(new LoggerConfiguration()
+Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger());
+    .CreateLogger();
 
+builder.Host.UseSerilog();
 // Add services to the container.
 
 // Build DatabaseConnectionConfig.
@@ -66,6 +67,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
 
 app.UseAuthorization();
 
