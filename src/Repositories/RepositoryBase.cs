@@ -5,10 +5,12 @@ namespace ProjectsWebApi.Repositories;
 public abstract class RepositoryBase
 {
     protected DatabaseConnectionConfig connectionConfig;
+    protected ILogger<RepositoryBase> logger;
     protected string connectionString;
-    public RepositoryBase(DatabaseConnectionConfig connectionConfig)
+    public RepositoryBase(DatabaseConnectionConfig connectionConfig, ILogger<RepositoryBase> logger)
     {
         this.connectionConfig = connectionConfig;
+        this.logger = logger;
         connectionString = connectionConfig.GetConnectionString();
     }
 
@@ -37,7 +39,14 @@ public abstract class RepositoryBase
     internal void InitializeTable(TableSchema schema)
     {
         // Not sure if anything else needs to be done, at the moment "Initialize" simply calls "Create".
-        CreateTable(schema.Schema);
+        try
+        {
+            CreateTable(schema.Schema);
+        }
+        catch (Exception ex)
+        {
+            logger.LogCritical(ex, "FATAL EXCEPTION encountered while attempting to create the following table:\n------------------------------\n{schema}\n------------------------------", schema.Schema);
+        }
     }
 
     internal void CreateTable(string schema)

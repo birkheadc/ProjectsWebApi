@@ -11,11 +11,15 @@ ARG MYSQL_DATABASE
 ARG MYSQL_USER
 ARG MYSQL_PASSWORD
 
+ARG PASSWORD
+
 ENV ASPNETCORE_MYSQL_SERVER=${MYSQL_SERVER}
 ENV ASPNETCORE_MYSQL_PORT=${MYSQL_PORT}
 ENV ASPNETCORE_MYSQL_DATABASE=${MYSQL_DATABASE}
 ENV ASPNETCORE_MYSQL_USER=${MYSQL_USER}
 ENV ASPNETCORE_MYSQL_PASSWORD=${MYSQL_PASSWORD}
+
+ENV ASPNETCORE_PASSWORD=${PASSWORD}
 
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-dotnet-configure-containers

@@ -1,16 +1,22 @@
+using Microsoft.Extensions.Logging.Configuration;
 using ProjectsWebApi.Repositories;
 using ProjectsWebApi.Services;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddSerilog(new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger());
+
 // Add services to the container.
 
-// Build DatabaseConnectionConfig
-
+// Build DatabaseConnectionConfig.
 DatabaseConnectionConfig connectionConfig;
 if (builder.Environment.IsDevelopment() == true)
 {
     connectionConfig = builder.Configuration.GetSection("MySql").Get<DatabaseConnectionConfig>();
+    // Also retrieve API password if in development.
     Environment.SetEnvironmentVariable("ASPNETCORE_PASSWORD", builder.Configuration["Password"]);
 }
 else
@@ -26,7 +32,6 @@ else
 }
 
 // Build TableSchemasConfiguration
-
 TableSchemasConfiguration schemasConfiguration = builder.Configuration.GetSection("TableSchemasConfiguration").Get<TableSchemasConfiguration>();
 
 var services = builder.Services;

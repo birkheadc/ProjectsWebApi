@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace ProjectsWebApi.Models;
 
 public record ProjectIncoming
@@ -16,4 +18,21 @@ public record ProjectIncoming
     public string Source { get; set; }
     ///<summary>Whether the project is marked favorite or not.</summary>
     public bool IsFavorite { get; set; }
+
+    public override string ToString()
+    {
+        StringBuilder sb = new();
+        sb.Append($"NAME: {Name}\nSHORT_DESCRIPTION: {ShortDescription}\nLONG_DESCRIPTION: {LongDescription}\nTECHNOLOGIES: [");
+        
+        foreach (string tech in Technologies)
+        {
+            sb.Append(tech + ", ");
+        }
+        sb.Length -= 2;
+        sb.Append("]\n");
+        
+        sb.Append($"SITE: {Site}\nSOURCE: {Source}\nIS_FAVORITE: {IsFavorite.ToString()}");
+        
+        return sb.ToString();
+    }
 }

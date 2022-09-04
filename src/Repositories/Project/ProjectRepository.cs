@@ -6,7 +6,7 @@ namespace ProjectsWebApi.Repositories;
 
 public class ProjectRepository : RepositoryBase, IProjectRepository
 {
-    public ProjectRepository(DatabaseConnectionConfig connectionConfig, TableSchemasConfiguration tableSchemasConfiguration) : base(connectionConfig)
+    public ProjectRepository(DatabaseConnectionConfig connectionConfig, TableSchemasConfiguration tableSchemasConfiguration, ILogger<ProjectRepository> logger) : base(connectionConfig, logger)
     {
         InitializeTables(tableSchemasConfiguration.TableSchemas["Projects"]);
     }
@@ -20,6 +20,36 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             MySqlCommand command = new();
             command.Connection = connection;
             command.CommandText = "SELECT * FROM projects;";
+
+            connection.Open();
+            using (MySqlDataReader reader = command.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Project project = GetProjectFromReader(reader);
+                    projects.Add(project);
+                }
+            }
+            connection.Close();
+        }
+
+        foreach (Project project in projects)
+        {
+            project.Technologies = FindAllTechnologiesOfProject(project.Id);
+        }
+
+        return projects;
+    }
+
+    public IEnumerable<Project> FindAllFavorites()
+    {
+        List<Project> projects = new();
+
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "SELECT * FROM projects WHERE is_favorite=1;";
 
             connection.Open();
             using (MySqlDataReader reader = command.ExecuteReader())
@@ -67,7 +97,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
     ///<summary>Inserts the Project into the database. Because there is a many-to-many relationship between Projects and Technologies, this requires a few steps.</summary>
     public void Insert(Project project)
     {
-        Console.WriteLine("Attempting to insert project...");
+        logger.LogInformation("Attempting to insert project...");
 
         InsertProject(project);
         if (project.Technologies.Length > 0)
@@ -109,7 +139,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             sb.Length -= 2;
             command.Parameters.AddRange(parameters.ToArray());
             command.CommandText = sb.ToString();
-            Console.WriteLine($"Executing: {sb.ToString()}");
+            logger.LogInformation("Executing: {command}", sb.ToString());
             connection.Open();
             command.ExecuteNonQuery();
             connection.Close();
@@ -154,7 +184,6 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
                 string p = "@p_"+i;
                 sb.Append($"{p}, ");
                 MySqlParameter parameter = new(p, technologies[i]);
-                Console.WriteLine($"{p} == {technologies[i]}");
                 parameters.Add(parameter);
             }
             sb.Length -= 2;
@@ -162,10 +191,9 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
 
             command.Parameters.AddRange(parameters.ToArray());
             command.Parameters.AddWithValue("@project_id", id.ToString());
-            Console.WriteLine($"@project_id == {id.ToString()}");
             command.CommandText = sb.ToString();
 
-            Console.WriteLine($"Executing code: {sb.ToString()}");
+            logger.LogInformation("Executing: {command}", sb.ToString());
 
             connection.Open();
             command.ExecuteNonQuery();
