@@ -2,8 +2,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS base
 WORKDIR /app
 EXPOSE 5000
 
+ARG ENVIRONMENT
+
 ENV ASPNETCORE_URLS=http://+:5000
-ENV ASPNETCORE_ENVIRONMENT=Production
+ENV ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}
 
 ARG MYSQL_SERVER
 ARG MYSQL_PORT
@@ -24,6 +26,7 @@ ENV ASPNETCORE_PASSWORD=${PASSWORD}
 # Creates a non-root user with an explicit UID and adds permission to access the /app folder
 # For more info, please refer to https://aka.ms/vscode-docker-dotnet-configure-containers
 RUN adduser -u 5678 --disabled-password --gecos "" appuser && chown -R appuser /app
+RUN mkdir /var/log/projectsWebApi && chown -R appuser /var/log/projectsWebApi
 USER appuser
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0-focal AS build
@@ -40,4 +43,6 @@ RUN dotnet publish "ProjectsWebApi.csproj" -c Release -o /app/publish /p:UseAppH
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+
 ENTRYPOINT ["dotnet", "ProjectsWebApi.dll"]

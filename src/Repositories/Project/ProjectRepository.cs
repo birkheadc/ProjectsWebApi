@@ -139,7 +139,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             sb.Length -= 2;
             command.Parameters.AddRange(parameters.ToArray());
             command.CommandText = sb.ToString();
-            logger.LogInformation("Executing: {command}", sb.ToString());
+            logger.LogDebug("Executing: {command}", sb.ToString());
             connection.Open();
             command.ExecuteNonQuery();
             connection.Close();
@@ -193,7 +193,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             command.Parameters.AddWithValue("@project_id", id.ToString());
             command.CommandText = sb.ToString();
 
-            logger.LogInformation("Executing: {command}", sb.ToString());
+            logger.LogDebug("Executing: {command}", sb.ToString());
 
             connection.Open();
             command.ExecuteNonQuery();

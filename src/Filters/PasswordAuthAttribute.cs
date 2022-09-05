@@ -10,6 +10,7 @@ public class PasswordAuthAttribute : Attribute, IAsyncActionFilter
         // Refuse access if no password is included in request.
         if (!context.HttpContext.Request.Headers.TryGetValue("Authorization", out var password))
         {
+            
             context.Result = new UnauthorizedResult();
             return;
         }

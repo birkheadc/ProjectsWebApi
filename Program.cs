@@ -67,7 +67,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseSerilogRequestLogging();
 }
-app.UseHttpsRedirection();
+// if (app.Environment.IsProduction())
+// {
+//     app.UseHttpsRedirection();
+// }
 
 app.UseAuthorization();
 
