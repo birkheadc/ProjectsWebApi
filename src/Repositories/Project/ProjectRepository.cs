@@ -198,6 +198,22 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             connection.Close();
         }
     }
+    ///<summary>Unjoins all technologies for the given project id on table project_technologies.</summary>
+    private void Unjoin(Guid projectId)
+    {
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "DELETE FROM project_technologies WHERE project_id = @project_id;";
+            command.Parameters.AddWithValue("@project_id", projectId.ToString());
+            
+            connection.Open();
+            logger.LogDebug("Executing: {command}", "DELETE FROM projects WHERE project_id = @project_id;");
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+    }
     ///<summary>Builds a Project instance based on the current row that MySqlDataReader is reading from the database.</summary>
     private Project GetProjectFromReader(MySqlDataReader reader)
     {
@@ -214,7 +230,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         };
         return project;
     }
-
+    ///<summary>Deletes from projects and project_technologies the rows with the given Id</summary>
     public void DeleteById(Guid id)
     {
         logger.LogInformation("Removing project from the database, project id: {id}", id);
@@ -242,9 +258,30 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         }
     }
 
+    ///<summary>Updates the project in projects with new values, then reconstructs the relevant rows in project_technologies as well</summary>
     public void Update(Project project)
     {
         logger.LogInformation("Updating project in database. Project:\n------------------------------\n{project}\n------------------------------", project.ToString());
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "UPDATE projects SET project_name = @name, short_description = @short, long_description = @long, site = @site, source = @source, is_favorite = @fav WHERE project_id = @id";
+            command.Parameters.AddWithValue("@name", project.Name);
+            command.Parameters.AddWithValue("@short", project.ShortDescription);
+            command.Parameters.AddWithValue("@long", project.LongDescription);
+            command.Parameters.AddWithValue("@site", project.Site);
+            command.Parameters.AddWithValue("@source", project.Source);
+            command.Parameters.AddWithValue("@fav", project.IsFavorite ? 1 : 0);
+            command.Parameters.AddWithValue("@id", project.Id.ToString());
 
+            connection.Open();
+            logger.LogDebug("Executing: {command}", "UPDATE projects SET project_name = @name, short_description = @short, long_description = @longc, site = @site, source = @source, is_favorite = @fav WHERE project_id = @id");
+            command.ExecuteNonQuery();
+            connection.Close();
+
+            Unjoin(project.Id);
+            Join(project.Id, project.Technologies);
+        }
     }
 }

@@ -11,11 +11,13 @@ public class ProjectController : ControllerBase
 {
     private readonly IProjectService service;
     private readonly ILogger<ProjectController> logger;
+    private readonly IWebHostEnvironment env;
 
-    public ProjectController(IProjectService service, ILogger<ProjectController> logger)
+    public ProjectController(IProjectService service, ILogger<ProjectController> logger, IWebHostEnvironment env)
     {
         this.service = service;
         this.logger = logger;
+        this.env = env;
     }
 
     [HttpGet]
@@ -51,6 +53,10 @@ public class ProjectController : ControllerBase
     [Route("populate")]
     public IActionResult DEBUG_Populate()
     {
+        if (env.IsDevelopment() == false)
+        {
+            return NotFound();
+        }
         try
         {
             List<ProjectIncoming> projects = new();
@@ -164,7 +170,7 @@ public class ProjectController : ControllerBase
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Exception when attempting to process request InsertProject. Project to be inserted:\n{project}", project.ToString());
+            logger.LogWarning(ex, "Exception when attempting to process request UpdateProject. Project to be updated:\n{project}", project.ToString());
             return BadRequest("Something went wrong!");
         }
     }
