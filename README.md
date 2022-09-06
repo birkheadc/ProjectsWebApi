@@ -163,4 +163,24 @@ Use a random string as a password. Store that string in the database of the app 
 
 # Logging
 
-This app uses Serilog for logging. // Todo: Write this section.
+This app uses Serilog for logging. The following NuGet packages are used:
+- `Serilog.AspNetCore 6.2.3`
+- `Serilog.Settings.Configuration 3.3.0`
+- `Serilog.Enrichers.Environment 2.2.0`
+- `Serilog.Enrichers.Thread 3.1.0`
+- `Serilog.Enrichers.Process 2.0.2`
+
+Logging configuration is set to be read from the `"Serilog"` section in `appsettings.json`.
+
+Currently, logging is sent to the console, as well as written in JSON format to a daily log_{date}.json file.
+
+## Logging & Docker Volumes
+When building the app with `docker compose`, in order to write these log files to a volume so that they can be accessed outside of the container, I have been forced to run the app as root inside its container.
+
+This seems dangerous, but so far I have not found a better solution. It appears that no matter what I do, the file inside the container that is designated as a volume is always owned by root, and cannot be written to by any other user.
+
+I was confused at first, because my MySql containers have never had this problem. But upon further inspection, that was because my MySql containers had been running as root the entire time.
+
+I suspect it may be possible to grant certain permissions on the HOST file-system to specific user Ids, then making certain that the users in the containers have the same Ids. But this coupling of host to container leaves a sour taste in my mouth; it seems to run opposed to the very point of containerization.
+
+I'm sure there's a good solution somewhere, but at the moment I have simply resigned myself to letting the apps run as root in their containers.
