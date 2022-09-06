@@ -47,20 +47,68 @@ public class ProjectController : ControllerBase
         }
     }
 
-    [HttpGet]
-    [Route("ex")]
-    public IActionResult GetException()
+    [HttpPost]
+    [Route("populate")]
+    public IActionResult DEBUG_Populate()
     {
         try
         {
-            throw new Exception("Whomp whomp");
+            List<ProjectIncoming> projects = new();
+            for (int i = 0; i < 10; i++)
+            {
+                ProjectIncoming project = new()
+                {
+                    Name = $"Project_{i}",
+                    ShortDescription = "A short description.",
+                    LongDescription = "A longer description of the application and/or project or something.",
+                    Technologies = RandomTechs(),
+                    Site = $"www.project.{i}.com",
+                    Source = $"git.project.{i}.com"
+                };
+                projects.Add(project);
+            }
+            service.AddProjects(projects);
             return Ok();
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Encountered exception. On purpose.");
-            return BadRequest("Whomp whomp");
+            logger.LogWarning(ex, "Exception when attempting to process request Populate.");
+            return BadRequest("Something went wrong!");
         }
+    }
+
+    private string[] RandomTechs()
+    {
+        string[] techs = new string[]
+        {
+            "c#",
+            "html5",
+            "javascript",
+            "css",
+            "java",
+            "spring",
+            "unity",
+            "python",
+            "c",
+            "c++",
+            "unreal_engine",
+            "aspnet",
+            "lua",
+            "react"
+        };
+        Random a = new Random();
+        Random b = new Random();
+
+        int num = a.Next(1, 4);
+
+        string[] s = new string[num];
+        
+        for (int i = 0; i < num; i++)
+        {
+            int j = b.Next(0, 13);
+            s[i] = techs[j];
+        }
+        return s;
     }
 
     [HttpPost]
@@ -70,6 +118,48 @@ public class ProjectController : ControllerBase
         try
         {
             service.AddProject(project);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Exception when attempting to process request InsertProject. Project to be inserted:\n{project}", project.ToString());
+            return BadRequest("Something went wrong!");
+        }
+    }
+
+    [HttpDelete]
+    [PasswordAuth]
+    [Route("{id}")]
+    public IActionResult DeleteProject([FromRoute (Name = "id")] string id)
+    {
+        Guid guid;
+        try
+        {
+            guid = Guid.Parse(id);
+        }
+        catch
+        {
+            return BadRequest($"Id [{id}] is not valid format.");
+        }
+        try
+        {
+            service.DeleteProjectById(guid);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Exception when attempting to process request DeleteProject. Project Id to be deleted: {id}", id);
+            return BadRequest("Something went wrong!");
+        }
+    }
+
+    [HttpPut]
+    [PasswordAuth]
+    public IActionResult UpdateProject(Project project)
+    {
+        try
+        {
+            service.UpdateProject(project);
             return Ok();
         }
         catch (Exception ex)

@@ -12,4 +12,8 @@ public interface IProjectRepository
     public void Insert(Project project);
     ///<summary>Add multiple Projects to the database. This simply calls Insert in a foreach loop, so is not any more optimal than calling Insert manually.</summary>
     public void InsertRange(IEnumerable<Project> projects);
+    ///<summary>Finds the project by ID and removes it from the database.</summary>
+    public void DeleteById(Guid id);
+    ///<summary>Finds the project in the database with the same ID, and updates it to match the supplied project. Does nothing if the ID has no match.</summary>
+    public void Update(Project project);
 }

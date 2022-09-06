@@ -97,12 +97,10 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
     ///<summary>Inserts the Project into the database. Because there is a many-to-many relationship between Projects and Technologies, this requires a few steps.</summary>
     public void Insert(Project project)
     {
-        logger.LogInformation("Attempting to insert project...");
-
+        logger.LogInformation("Adding project to database. Project:\n------------------------------\n{project}\n------------------------------", project.ToString());
         InsertProject(project);
         if (project.Technologies.Length > 0)
         {
-            
             InsertTechnologies(project.Technologies);
             Join(project.Id, project.Technologies);
         }
@@ -200,7 +198,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             connection.Close();
         }
     }
-
+    ///<summary>Builds a Project instance based on the current row that MySqlDataReader is reading from the database.</summary>
     private Project GetProjectFromReader(MySqlDataReader reader)
     {
         Project project = new()
@@ -215,5 +213,38 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             IsFavorite = Boolean.Parse(reader["is_favorite"].ToString())
         };
         return project;
+    }
+
+    public void DeleteById(Guid id)
+    {
+        logger.LogInformation("Removing project from the database, project id: {id}", id);
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand commandA = new();
+            commandA.Connection = connection;
+            commandA.CommandText = "DELETE FROM project_technologies WHERE project_id = @project_id;";
+            commandA.Parameters.AddWithValue("@project_id", id.ToString());
+
+            MySqlCommand commandB = new();
+            commandB.Connection = connection;
+            commandB.CommandText = "DELETE FROM projects WHERE project_id = @project_id;";
+            commandB.Parameters.AddWithValue("@project_id", id.ToString());
+            
+            connection.Open();
+            
+            logger.LogDebug("Executing: {command}", "DELETE FROM project_technologies WHERE project_id = @project_id;");
+            commandA.ExecuteNonQuery();
+            
+            logger.LogDebug("Executing: {command}", "DELETE FROM projects WHERE project_id = @project_id;");
+            commandB.ExecuteNonQuery();
+            
+            connection.Close();
+        }
+    }
+
+    public void Update(Project project)
+    {
+        logger.LogInformation("Updating project in database. Project:\n------------------------------\n{project}\n------------------------------", project.ToString());
+
     }
 }

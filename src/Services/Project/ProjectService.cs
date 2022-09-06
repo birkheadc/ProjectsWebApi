@@ -17,13 +17,17 @@ public class ProjectService : IProjectService
 
     public void AddProject(ProjectIncoming project)
     {
-        logger.LogInformation("Adding project to database. Project:\n------------------------------\n{project}\n------------------------------", project.ToString());
         repository.Insert(ProjectConverter.ToEntity(project));
     }
 
     public void AddProjects(IEnumerable<ProjectIncoming> projects)
     {
         repository.InsertRange(ProjectConverter.ToEntity(projects));
+    }
+
+    public void DeleteProjectById(Guid id)
+    {
+        repository.DeleteById(id);
     }
 
     public IEnumerable<Project> GetAllFavoriteProjects()
@@ -34,5 +38,10 @@ public class ProjectService : IProjectService
     public IEnumerable<Project> GetAllProjects()
     {
         return repository.FindAll();
+    }
+
+    public void UpdateProject(Project project)
+    {
+        repository.Update(project);
     }
 }
