@@ -32,7 +32,8 @@ The `Project` model consists of all the information I need to display informatio
 
 - ID -- A unique Guid for each project, to ensure database rows don't clash, as well as give React a good Key for iterating over objects
 - Name
-- Short and Long Descriptions -- short for a quick summary, like a sub-title; long for a full section on my 'My Projects' page
+- ShortDescriptions -- a Dictionary of descriptions, with support for multiple languages. The key is the language, the value is the content of the description. Used for writing a quick blurb or subtitle for the project.
+- LongDescriptions -- same as above, but containing a long form explanation of the project.
 - Technologies -- a quick list of what tech was used to build it
 - Site and Source -- links to the project's site / source code
 
@@ -83,16 +84,16 @@ If running in a container, connecting to a MySql server can be slightly more dif
 
 ## Database
 
-This project makes manual calls to a MySql database. The database consists of three tables, which can be created via the following schema:
+This project makes manual calls to a MySql database. The database consists of five tables, which can be created via the following schema:
 
 **Main Projects Table:**
+
+The main table containing each project.
 
 ```
 CREATE TABLE IF NOT EXISTS `projects` (
   `project_id` VARCHAR(36) NOT NULL,
   `project_name` tinytext,
-  `short_description` text,
-  `long_description` text,
   `site` text,
   `source` text,
   `is_favorite` tinyint(1) NOT NULL DEFAULT 0,
@@ -101,6 +102,8 @@ CREATE TABLE IF NOT EXISTS `projects` (
 ```
 
 **Technologies Table:**
+
+Contains a list of the technologies used in all projects. Used by a separate join table to relate them to their respective projects.
 
 ```
 CREATE TABLE IF NOT EXISTS `technologies` (
@@ -111,18 +114,71 @@ CREATE TABLE IF NOT EXISTS `technologies` (
 );
 ```
 
+
+
 **Project Technologies Join Table:**
+
+Joins projects and technologies in a many-to-many relationship.
+
 ```
 CREATE TABLE IF NOT EXISTS `project_technologies` (
   `project_id` VARCHAR(36) NOT NULL,
   `technology_id` VARCHAR(36) NOT NULL,
   PRIMARY KEY (`project_id`,`technology_id`),
   KEY `technology_id` (`technology_id`),
-  CONSTRAINT `project_technologies_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`),
-  CONSTRAINT `project_technologies_ibfk_2` FOREIGN KEY (`technology_id`) REFERENCES `technologies` (`technology_id`)
+  CONSTRAINT `project_technologies_ibfk_1` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE,
+  CONSTRAINT `project_technologies_ibfk_2` FOREIGN KEY (`technology_id`) REFERENCES `technologies` (`technology_id`) ON DELETE CASCADE
 );
 ```
 
+**ShortDescriptions Table:**
+
+A list of the short-descriptions related to each project in a one-to-many relationship.
+
+```
+CREATE TABLE IF NOT EXISTS `short_descriptions` (
+  `short_description_language` varchar(255) NOT NULL,
+  `short_description_content` text,
+  `project_id` varchar(36) NOT NULL,
+  PRIMARY KEY (`short_description_language`, `project_id`),
+  KEY `fk_project_id` (`project_id`),
+  CONSTRAINT `fk_short_description_project_id` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE
+);
+```
+
+
+**LongDescriptions Table:**
+
+A list of the long-descriptions related to each project in a one-to-many relationship.
+
+```
+CREATE TABLE IF NOT EXISTS `long_descriptions` (
+  `long_description_language` varchar(255) NOT NULL,
+  `long_description_content` text,
+  `project_id` varchar(36) NOT NULL,
+  PRIMARY KEY (`long_description_language`, `project_id`),
+  KEY `fk_project_id` (`project_id`),
+  CONSTRAINT `fk_long_description_project_id` FOREIGN KEY (`project_id`) REFERENCES `projects` (`project_id`) ON DELETE CASCADE
+);
+```
+### Adding languages
+To add additional languages to Short- and LongDescriptions, just add a new row with the same project_id, including the language as a short string in `{short/long}_description_language`.
+
+### Removing languages
+To remove a language: update the language while specifically setting the content of the language to a blank string. (Failing to include the language at all will cause the program to completely ignore that KeyValue pair, meaning nothing will be changed.)
+
+For example, if you wish to remove "german" from the list of short descriptions for a project, be sure to include `"german": ""` under `shortDescriptions` in the JSON, like so:
+```
+"shortDescriptions": {
+  "german": "",
+  "english": "my new english description",
+  ...
+}
+```
+
+Remember, omitting "german" entirely will **not** remove it from the project. It must be explicitly included and marked as empty, or the repository will ignore it.
+
+### Changing the schemas
 Table schemas should be saved in `appsettings.json`, where they will be accessed at runtime. The repositories will then use this to create tables if they are not already present. A section in `appsettings` should be formatted like this:
 
 ```
@@ -140,6 +196,14 @@ Table schemas should be saved in `appsettings.json`, where they will be accessed
         {
           "Name": "{project_technologies}",
           "Schema": "{schema}"
+        },
+        {
+          "Name": {short_descriptions}",
+          "Schema": "{schema}"
+        },
+        {
+          "Name": {long_descriptions}",
+          "Schema": "{schema}"
         }
       ]
     }
@@ -147,6 +211,10 @@ Table schemas should be saved in `appsettings.json`, where they will be accessed
 ```
 
 Curly brackets denote arbitrary strings, otherwise the string must be *exactly as written* for ASP.NET to map the JSON to the object correctly. Even the arbitrary strings, however, are hard-coded in the related Repository classes, so care should be taken to make sure they match.
+
+This application has no way of changing any tables that are already present. Therefore, when updating or making changes to the schemas, the relevant tables should be manually dropped from the mysql database. Failure to do so will likely result in the app crashing, because the tables will be in an unexpected format.
+
+(It would be nice to build a method for having the app reformat its tables on its own, but I felt this was unsafe, as there is the likelyhood of data being lost this way.)
 
 # Security
 

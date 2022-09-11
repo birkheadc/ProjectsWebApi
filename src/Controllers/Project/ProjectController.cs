@@ -51,6 +51,7 @@ public class ProjectController : ControllerBase
 
     [HttpPost]
     [Route("populate")]
+    [PasswordAuth]
     public IActionResult DEBUG_Populate()
     {
         if (env.IsDevelopment() == false)
@@ -65,8 +66,8 @@ public class ProjectController : ControllerBase
                 ProjectIncoming project = new()
                 {
                     Name = $"Project_{i}",
-                    ShortDescription = "A short description.",
-                    LongDescription = "A longer description of the application and/or project or something.",
+                    ShortDescriptions = GetShortDescriptions(),
+                    LongDescriptions = GetLongDescriptions(),
                     Technologies = RandomTechs(),
                     Site = $"www.project.{i}.com",
                     Source = $"git.project.{i}.com"
@@ -81,6 +82,22 @@ public class ProjectController : ControllerBase
             logger.LogWarning(ex, "Exception when attempting to process request Populate.");
             return BadRequest("Something went wrong!");
         }
+    }
+
+    private Dictionary<string, string> GetShortDescriptions()
+    {
+        Dictionary<string, string> d = new();
+        d.Add("english", "A short description");
+        d.Add("bablish", "Gobbledygook");
+        return d;
+    }
+
+    private Dictionary<string, string> GetLongDescriptions()
+    {
+        Dictionary<string, string> d = new();
+        d.Add("english", "A slightly longer description, with more words and stuff.");
+        d.Add("bablish", "Gobbledygook Gobbledygook Gobbledygook Gobbledygook");
+        return d;
     }
 
     private string[] RandomTechs()

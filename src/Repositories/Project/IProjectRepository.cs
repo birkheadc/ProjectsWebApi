@@ -5,7 +5,7 @@ namespace ProjectsWebApi.Repositories;
 public interface IProjectRepository
 {
     ///<summary>Returns all Projects in the database.</summary>
-    public IEnumerable<Project> FindAll();
+    public IEnumerable<Project> FindAll(bool favoriteOnly = false);
     ///<summary>Returns all Projects where IsFavorite is True.</summary>
     public IEnumerable<Project> FindAllFavorites();
     ///<summary>Add a single Project to the database.</summary>

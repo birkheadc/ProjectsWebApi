@@ -11,7 +11,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         InitializeTables(tableSchemasConfiguration.TableSchemas["Projects"]);
     }
 
-    public IEnumerable<Project> FindAll()
+    public IEnumerable<Project> FindAll(bool favoriteOnly = false)
     {
         List<Project> projects = new();
 
@@ -19,7 +19,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            command.CommandText = "SELECT * FROM projects;";
+            command.CommandText = favoriteOnly ? "SELECT * FROM projects WHERE is_favorite = 1" : "SELECT * FROM projects;";
 
             connection.Open();
             using (MySqlDataReader reader = command.ExecuteReader())
@@ -36,6 +36,8 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         foreach (Project project in projects)
         {
             project.Technologies = FindAllTechnologiesOfProject(project.Id);
+            project.ShortDescriptions = FindAllShortDescriptionsOfProject(project.Id);
+            project.LongDescriptions = FindAllLongDescriptionsOfProject(project.Id);
         }
 
         return projects;
@@ -43,32 +45,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
 
     public IEnumerable<Project> FindAllFavorites()
     {
-        List<Project> projects = new();
-
-        using (MySqlConnection connection = GetConnection())
-        {
-            MySqlCommand command = new();
-            command.Connection = connection;
-            command.CommandText = "SELECT * FROM projects WHERE is_favorite=1;";
-
-            connection.Open();
-            using (MySqlDataReader reader = command.ExecuteReader())
-            {
-                while (reader.Read())
-                {
-                    Project project = GetProjectFromReader(reader);
-                    projects.Add(project);
-                }
-            }
-            connection.Close();
-        }
-
-        foreach (Project project in projects)
-        {
-            project.Technologies = FindAllTechnologiesOfProject(project.Id);
-        }
-
-        return projects;
+        return FindAll(true);
     }
 
     private string[] FindAllTechnologiesOfProject(Guid projectId)
@@ -94,11 +71,71 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         return technologies.ToArray();
     }
 
+    private Dictionary<string, string> FindAllShortDescriptionsOfProject(Guid projectId)
+    {
+        Dictionary<string, string> descriptions = new();
+
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "SELECT * FROM short_descriptions WHERE project_id = @pid";
+            command.Parameters.AddWithValue("@pid", projectId.ToString());
+            
+            connection.Open();
+            
+            using (MySqlDataReader reader = command.ExecuteReader())
+            {
+                 while (reader.Read())
+                 {
+                    string language = reader["short_description_language"].ToString() ?? "";
+                    string content = reader["short_description_content"].ToString() ?? "";
+                    descriptions.Add(language, content);
+                 }
+            }
+            
+            connection.Close();
+        }
+
+        return descriptions;
+    }
+
+    private Dictionary<string, string> FindAllLongDescriptionsOfProject(Guid projectId)
+    {
+        Dictionary<string, string> descriptions = new();
+
+        using (MySqlConnection connection = GetConnection())
+        {
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "SELECT * FROM long_descriptions WHERE project_id = @pid";
+            command.Parameters.AddWithValue("@pid", projectId.ToString());
+            
+            connection.Open();
+            
+            using (MySqlDataReader reader = command.ExecuteReader())
+            {
+                 while (reader.Read())
+                 {
+                    string language = reader["long_description_language"].ToString() ?? "";
+                    string content = reader["long_description_content"].ToString() ?? "";
+                    descriptions.Add(language, content);
+                 }
+            }
+            
+            connection.Close();
+        }
+
+        return descriptions;
+    }
+
     ///<summary>Inserts the Project into the database. Because there is a many-to-many relationship between Projects and Technologies, this requires a few steps.</summary>
     public void Insert(Project project)
     {
         logger.LogInformation("Adding project to database. Project:\n------------------------------\n{project}\n------------------------------", project.ToString());
         InsertProject(project);
+        InsertShortDescriptions(project.ShortDescriptions, project.Id);
+        InsertLongDescriptions(project.LongDescriptions, project.Id);
         if (project.Technologies.Length > 0)
         {
             InsertTechnologies(project.Technologies);
@@ -110,6 +147,85 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
     {
         foreach (Project project in projects) Insert(project);
     }
+    ///<summary>Adds the description to the database, language name and description content can then be retreived via the project_id</summary>
+    private void InsertShortDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    {
+        MySqlCommand command = new();
+
+        StringBuilder sb = new();
+        sb.Append("INSERT INTO short_descriptions (short_description_language, short_description_content, project_id) VALUES ");
+        foreach (KeyValuePair<string, string> description in descriptions)
+        {
+            string language = description.Key;
+            string content = description.Value;
+
+            Dictionary<string, string> parameters = new();
+            parameters.Add($"@sdl_{language}", language);
+            parameters.Add($"@sdc_{language}", content);
+            parameters.Add($"@pid_{language}", projectId.ToString());
+            
+            sb.Append("(");
+            foreach (KeyValuePair<string, string> parameter in parameters)
+            {
+                sb.Append(parameter.Key);
+                sb.Append(", ");
+                command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+            }
+            sb.Length -= 2;
+            sb.Append("), ");
+        }
+        sb.Length -= 2;
+        command.CommandText = sb.ToString();
+        using (MySqlConnection connection = GetConnection())
+        {
+            command.Connection = connection;
+            connection.Open();
+            logger.LogDebug($"Executing: {command.CommandText}");
+            command.ExecuteNonQuery();
+
+            connection.Close();
+        }
+    }
+    ///<summary>Adds the description to the database, language name and description content can then be retreived via the project_id</summary>
+    private void InsertLongDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    {
+        MySqlCommand command = new();
+
+        StringBuilder sb = new();
+        sb.Append("INSERT INTO long_descriptions (long_description_language, long_description_content, project_id) VALUES ");
+        foreach (KeyValuePair<string, string> description in descriptions)
+        {
+            string language = description.Key;
+            string content = description.Value;
+
+            Dictionary<string, string> parameters = new();
+            parameters.Add($"@ldl_{language}", language);
+            parameters.Add($"@ldc_{language}", content);
+            parameters.Add($"@pid_{language}", projectId.ToString());
+            
+            sb.Append("(");
+            foreach (KeyValuePair<string, string> parameter in parameters)
+            {
+                sb.Append(parameter.Key);
+                sb.Append(", ");
+                command.Parameters.AddWithValue(parameter.Key, parameter.Value);
+            }
+            sb.Length -= 2;
+            sb.Append("), ");
+        }
+        sb.Length -= 2;
+        command.CommandText = sb.ToString();
+        using (MySqlConnection connection = GetConnection())
+        {
+            command.Connection = connection;
+            connection.Open();
+            logger.LogDebug($"Executing: {command.CommandText}");
+            command.ExecuteNonQuery();
+
+            connection.Close();
+        }
+    }
+
     ///<summary>Adds technologies to the technologies table database if they don't already exist.</summary>
     private void InsertTechnologies(string[] technologies)
     {
@@ -151,11 +267,9 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            command.CommandText = $"INSERT INTO projects (project_id, project_name, short_description, long_description, site, source, is_favorite) values (@id, @name, @shortDesc, @longDesc, @site, @source, @isFavorite)";
+            command.CommandText = $"INSERT INTO projects (project_id, project_name, site, source, is_favorite) values (@id, @name, @site, @source, @isFavorite)";
             command.Parameters.AddWithValue("@id", project.Id);
             command.Parameters.AddWithValue("@name", project.Name);
-            command.Parameters.AddWithValue("@shortDesc", project.ShortDescription);
-            command.Parameters.AddWithValue("@longDesc", project.LongDescription);
             command.Parameters.AddWithValue("@site", project.Site);
             command.Parameters.AddWithValue("@source", project.Source);
             command.Parameters.AddWithValue("@isFavorite", project.IsFavorite ? 1 : 0);
@@ -221,38 +335,29 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             Id = Guid.Parse(reader["project_id"].ToString() ?? ""),
             Name = reader["project_name"].ToString() ?? "",
-            ShortDescription = reader["short_description"].ToString() ?? "",
-            LongDescription = reader["long_description"].ToString() ?? "",
-            // Technologies are built with another query later
+            // Descriptions and Technologies are built later
             Site = reader["site"].ToString() ?? "",
             Source = reader["source"].ToString() ?? "",
             IsFavorite = Boolean.Parse(reader["is_favorite"].ToString())
         };
         return project;
     }
-    ///<summary>Deletes from projects and project_technologies the rows with the given Id</summary>
+    ///<summary>Deletes from projects the rows with the given Id. ON DELETE CASCADE should be enabled in relevant tables, so there is no need to manually delete from linked tables.</summary>
     public void DeleteById(Guid id)
     {
         logger.LogInformation("Removing project from the database, project id: {id}", id);
         using (MySqlConnection connection = GetConnection())
         {
-            MySqlCommand commandA = new();
-            commandA.Connection = connection;
-            commandA.CommandText = "DELETE FROM project_technologies WHERE project_id = @project_id;";
-            commandA.Parameters.AddWithValue("@project_id", id.ToString());
 
-            MySqlCommand commandB = new();
-            commandB.Connection = connection;
-            commandB.CommandText = "DELETE FROM projects WHERE project_id = @project_id;";
-            commandB.Parameters.AddWithValue("@project_id", id.ToString());
+            MySqlCommand command = new();
+            command.Connection = connection;
+            command.CommandText = "DELETE FROM projects WHERE project_id = @project_id;";
+            command.Parameters.AddWithValue("@project_id", id.ToString());
             
             connection.Open();
             
-            logger.LogDebug("Executing: {command}", "DELETE FROM project_technologies WHERE project_id = @project_id;");
-            commandA.ExecuteNonQuery();
-            
             logger.LogDebug("Executing: {command}", "DELETE FROM projects WHERE project_id = @project_id;");
-            commandB.ExecuteNonQuery();
+            command.ExecuteNonQuery();
             
             connection.Close();
         }
@@ -266,22 +371,82 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            command.CommandText = "UPDATE projects SET project_name = @name, short_description = @short, long_description = @long, site = @site, source = @source, is_favorite = @fav WHERE project_id = @id";
+            command.CommandText = "UPDATE projects SET project_name = @name, site = @site, source = @source, is_favorite = @fav WHERE project_id = @id";
             command.Parameters.AddWithValue("@name", project.Name);
-            command.Parameters.AddWithValue("@short", project.ShortDescription);
-            command.Parameters.AddWithValue("@long", project.LongDescription);
             command.Parameters.AddWithValue("@site", project.Site);
             command.Parameters.AddWithValue("@source", project.Source);
             command.Parameters.AddWithValue("@fav", project.IsFavorite ? 1 : 0);
             command.Parameters.AddWithValue("@id", project.Id.ToString());
 
             connection.Open();
-            logger.LogDebug("Executing: {command}", "UPDATE projects SET project_name = @name, short_description = @short, long_description = @longc, site = @site, source = @source, is_favorite = @fav WHERE project_id = @id");
+            logger.LogDebug("Executing: {command}", command.CommandText);
             command.ExecuteNonQuery();
             connection.Close();
 
             Unjoin(project.Id);
             Join(project.Id, project.Technologies);
+
+            UpdateShortDescriptions(project.ShortDescriptions, project.Id);
+            UpdateLongDescriptions(project.LongDescriptions, project.Id);
+        }
+    }
+    ///<summary>Inserts rows for each language if they do not exist, then updates the contents of those rows to match new description. If the description is empty, remove that description instead.</summary>
+    private void UpdateShortDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    {
+        using (MySqlConnection connection = GetConnection())
+        {
+            foreach (KeyValuePair<string, string> description in descriptions)
+            {
+                MySqlCommand command = new();
+                command.Connection = connection;
+                if (description.Value == "")
+                {
+                    command.CommandText = "DELETE FROM short_descriptions WHERE short_description_language = @sdl";
+                }
+                else
+                {
+                    command.CommandText = "INSERT INTO short_descriptions (short_description_language, short_description_content, project_id) VALUES (@sdl, @sdc, @pid) ON DUPLICATE KEY UPDATE short_description_content = @sdc";
+                }
+                command.Parameters.AddWithValue("@sdl", description.Key);
+                command.Parameters.AddWithValue("@sdc", description.Value);
+                command.Parameters.AddWithValue("@pid", projectId.ToString());
+
+                connection.Open();
+                
+                command.ExecuteNonQuery();
+                
+                connection.Close();
+            }
+        }
+    }
+    
+    ///<summary>Inserts rows for each language if they do not exist, then updates the contents of those rows to match new description. If the description is empty, remove that description instead.</summary>
+    private void UpdateLongDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    {
+        using (MySqlConnection connection = GetConnection())
+        {
+            foreach (KeyValuePair<string, string> description in descriptions)
+            {
+                MySqlCommand command = new();
+                command.Connection = connection;
+                if (description.Value == "")
+                {
+                    command.CommandText = "DELETE FROM long_descriptions WHERE long_description_language = @ldl";
+                }
+                else
+                {
+                    command.CommandText = "INSERT INTO long_descriptions (long_description_language, long_description_content, project_id) VALUES (@ldl, @ldc, @pid) ON DUPLICATE KEY UPDATE long_description_content = @ldc";
+                }
+                command.Parameters.AddWithValue("@ldl", description.Key);
+                command.Parameters.AddWithValue("@ldc", description.Value);
+                command.Parameters.AddWithValue("@pid", projectId.ToString());
+
+                connection.Open();
+                
+                command.ExecuteNonQuery();
+                
+                connection.Close();
+            }
         }
     }
 }

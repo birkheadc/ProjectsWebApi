@@ -8,10 +8,10 @@ public record Project
     public Guid Id { get; set; }
     ///<summary>The name of the project.</summary>
     public string Name { get; set; }
-    ///<summary>A short description of the project.</summary>
-    public string ShortDescription { get; set; }
-    ///<summary>A full description of the project.</summary>
-    public string LongDescription { get; set; }
+    ///<summary>A dictionary of short descriptions of the project, by language. {language, description}</summary>
+    public Dictionary<string, string> ShortDescriptions { get; set; }
+    ///<summary>A dictionary of long descriptions of the project, by language. {language, description}</summary>
+    public Dictionary<string, string> LongDescriptions { get; set; }
     ///<summary>A list of what technologies the project uses.</summary>
     public string[] Technologies { get; set; }
     ///<summary>Link to the website of the project.</summary>
@@ -23,18 +23,20 @@ public record Project
 
     public override string ToString()
     {
-        StringBuilder sb = new();
-        sb.Append($"ID: {Id.ToString()}\nNAME: {Name}\nSHORT_DESCRIPTION: {ShortDescription}\nLONG_DESCRIPTION: {LongDescription}\nTECHNOLOGIES: [");
+        return Name;
+        // Todo: rebuild this with multiple descriptions.
+        // StringBuilder sb = new();
+        // sb.Append($"ID: {Id.ToString()}\nNAME: {Name}\nSHORT_DESCRIPTION: {ShortDescription}\nLONG_DESCRIPTION: {LongDescription}\nTECHNOLOGIES: [");
         
-        foreach (string tech in Technologies)
-        {
-            sb.Append(tech + ", ");
-        }
-        sb.Length -= 2;
-        sb.Append("]\n");
+        // foreach (string tech in Technologies)
+        // {
+        //     sb.Append(tech + ", ");
+        // }
+        // sb.Length -= 2;
+        // sb.Append("]\n");
         
-        sb.Append($"SITE: {Site}\nSOURCE: {Source}\nIS_FAVORITE: {IsFavorite.ToString()}");
+        // sb.Append($"SITE: {Site}\nSOURCE: {Source}\nIS_FAVORITE: {IsFavorite.ToString()}");
         
-        return sb.ToString();
+        // return sb.ToString();
     }
 }

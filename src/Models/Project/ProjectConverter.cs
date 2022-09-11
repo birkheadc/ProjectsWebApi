@@ -8,8 +8,8 @@ public static class ProjectConverter
         {
             Id = Guid.NewGuid(),
             Name = incoming.Name,
-            ShortDescription = incoming.ShortDescription,
-            LongDescription = incoming.LongDescription,
+            ShortDescriptions = incoming.ShortDescriptions,
+            LongDescriptions = incoming.LongDescriptions,
             Technologies = incoming.Technologies,
             Site = incoming.Site,
             Source = incoming.Source,
