@@ -71,9 +71,9 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         return technologies.ToArray();
     }
 
-    private Dictionary<string, string> FindAllShortDescriptionsOfProject(Guid projectId)
+    private Description[] FindAllShortDescriptionsOfProject(Guid projectId)
     {
-        Dictionary<string, string> descriptions = new();
+        List<Description> descriptions = new();
 
         using (MySqlConnection connection = GetConnection())
         {
@@ -90,19 +90,23 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
                  {
                     string language = reader["short_description_language"].ToString() ?? "";
                     string content = reader["short_description_content"].ToString() ?? "";
-                    descriptions.Add(language, content);
+                    descriptions.Add(new()
+                    {
+                        Language = language,
+                        Content = content
+                    });
                  }
             }
             
             connection.Close();
         }
 
-        return descriptions;
+        return descriptions.ToArray();
     }
 
-    private Dictionary<string, string> FindAllLongDescriptionsOfProject(Guid projectId)
+    private Description[] FindAllLongDescriptionsOfProject(Guid projectId)
     {
-        Dictionary<string, string> descriptions = new();
+        List<Description> descriptions = new();
 
         using (MySqlConnection connection = GetConnection())
         {
@@ -119,14 +123,18 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
                  {
                     string language = reader["long_description_language"].ToString() ?? "";
                     string content = reader["long_description_content"].ToString() ?? "";
-                    descriptions.Add(language, content);
+                    descriptions.Add(new()
+                    {
+                        Language = language,
+                        Content = content
+                    });
                  }
             }
             
             connection.Close();
         }
 
-        return descriptions;
+        return descriptions.ToArray();
     }
 
     ///<summary>Inserts the Project into the database. Because there is a many-to-many relationship between Projects and Technologies, this requires a few steps.</summary>
@@ -148,16 +156,16 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         foreach (Project project in projects) Insert(project);
     }
     ///<summary>Adds the description to the database, language name and description content can then be retreived via the project_id</summary>
-    private void InsertShortDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    private void InsertShortDescriptions(Description[] descriptions, Guid projectId)
     {
         MySqlCommand command = new();
 
         StringBuilder sb = new();
         sb.Append("INSERT INTO short_descriptions (short_description_language, short_description_content, project_id) VALUES ");
-        foreach (KeyValuePair<string, string> description in descriptions)
+        foreach (Description description in descriptions)
         {
-            string language = description.Key;
-            string content = description.Value;
+            string language = description.Language;
+            string content = description.Content;
 
             Dictionary<string, string> parameters = new();
             parameters.Add($"@sdl_{language}", language);
@@ -187,16 +195,16 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         }
     }
     ///<summary>Adds the description to the database, language name and description content can then be retreived via the project_id</summary>
-    private void InsertLongDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    private void InsertLongDescriptions(Description[] descriptions, Guid projectId)
     {
         MySqlCommand command = new();
 
         StringBuilder sb = new();
         sb.Append("INSERT INTO long_descriptions (long_description_language, long_description_content, project_id) VALUES ");
-        foreach (KeyValuePair<string, string> description in descriptions)
+        foreach (Description description in descriptions)
         {
-            string language = description.Key;
-            string content = description.Value;
+            string language = description.Language;
+            string content = description.Content;
 
             Dictionary<string, string> parameters = new();
             parameters.Add($"@ldl_{language}", language);
@@ -391,15 +399,15 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         }
     }
     ///<summary>Inserts rows for each language if they do not exist, then updates the contents of those rows to match new description. If the description is empty, remove that description instead.</summary>
-    private void UpdateShortDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    private void UpdateShortDescriptions(Description[] descriptions, Guid projectId)
     {
         using (MySqlConnection connection = GetConnection())
         {
-            foreach (KeyValuePair<string, string> description in descriptions)
+            foreach (Description description in descriptions)
             {
                 MySqlCommand command = new();
                 command.Connection = connection;
-                if (description.Value == "")
+                if (description.Language == "")
                 {
                     command.CommandText = "DELETE FROM short_descriptions WHERE short_description_language = @sdl";
                 }
@@ -407,8 +415,8 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
                 {
                     command.CommandText = "INSERT INTO short_descriptions (short_description_language, short_description_content, project_id) VALUES (@sdl, @sdc, @pid) ON DUPLICATE KEY UPDATE short_description_content = @sdc";
                 }
-                command.Parameters.AddWithValue("@sdl", description.Key);
-                command.Parameters.AddWithValue("@sdc", description.Value);
+                command.Parameters.AddWithValue("@sdl", description.Language);
+                command.Parameters.AddWithValue("@sdc", description.Content);
                 command.Parameters.AddWithValue("@pid", projectId.ToString());
 
                 connection.Open();
@@ -421,15 +429,15 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
     }
     
     ///<summary>Inserts rows for each language if they do not exist, then updates the contents of those rows to match new description. If the description is empty, remove that description instead.</summary>
-    private void UpdateLongDescriptions(Dictionary<string, string> descriptions, Guid projectId)
+    private void UpdateLongDescriptions(Description[] descriptions, Guid projectId)
     {
         using (MySqlConnection connection = GetConnection())
         {
-            foreach (KeyValuePair<string, string> description in descriptions)
+            foreach (Description description in descriptions)
             {
                 MySqlCommand command = new();
                 command.Connection = connection;
-                if (description.Value == "")
+                if (description.Language == "")
                 {
                     command.CommandText = "DELETE FROM long_descriptions WHERE long_description_language = @ldl";
                 }
@@ -437,8 +445,8 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
                 {
                     command.CommandText = "INSERT INTO long_descriptions (long_description_language, long_description_content, project_id) VALUES (@ldl, @ldc, @pid) ON DUPLICATE KEY UPDATE long_description_content = @ldc";
                 }
-                command.Parameters.AddWithValue("@ldl", description.Key);
-                command.Parameters.AddWithValue("@ldc", description.Value);
+                command.Parameters.AddWithValue("@ldl", description.Language);
+                command.Parameters.AddWithValue("@ldc", description.Content);
                 command.Parameters.AddWithValue("@pid", projectId.ToString());
 
                 connection.Open();

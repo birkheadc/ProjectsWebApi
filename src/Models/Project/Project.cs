@@ -9,9 +9,9 @@ public record Project
     ///<summary>The name of the project.</summary>
     public string Name { get; set; }
     ///<summary>A dictionary of short descriptions of the project, by language. {language, description}</summary>
-    public Dictionary<string, string> ShortDescriptions { get; set; }
+    public Description[] ShortDescriptions { get; set; }
     ///<summary>A dictionary of long descriptions of the project, by language. {language, description}</summary>
-    public Dictionary<string, string> LongDescriptions { get; set; }
+    public Description[] LongDescriptions { get; set; }
     ///<summary>A list of what technologies the project uses.</summary>
     public string[] Technologies { get; set; }
     ///<summary>Link to the website of the project.</summary>

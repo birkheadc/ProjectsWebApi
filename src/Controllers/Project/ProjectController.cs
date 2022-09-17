@@ -84,19 +84,35 @@ public class ProjectController : ControllerBase
         }
     }
 
-    private Dictionary<string, string> GetShortDescriptions()
+    private Description[] GetShortDescriptions()
     {
-        Dictionary<string, string> d = new();
-        d.Add("english", "A short description");
-        d.Add("bablish", "Gobbledygook");
+        Description[] d = new Description[2];
+        d[0] = new Description
+        {
+            Language = "en",
+            Content = "stuff"
+        };
+        d[1] = new Description
+        {
+            Language = "bb",
+            Content = "Gobbledygook"
+        }; 
         return d;
     }
 
-    private Dictionary<string, string> GetLongDescriptions()
+    private Description[] GetLongDescriptions()
     {
-        Dictionary<string, string> d = new();
-        d.Add("english", "A slightly longer description, with more words and stuff.");
-        d.Add("bablish", "Gobbledygook Gobbledygook Gobbledygook Gobbledygook");
+        Description[] d = new Description[2];
+        d[0] = new Description
+        {
+            Language = "en",
+            Content = "A slightly longer description, with more words and stuff."
+        };
+        d[1] = new Description
+        {
+            Language = "bb",
+            Content = "Gobbledygook Gobbledygook Gobbledygook Gobbledygook"
+        }; 
         return d;
     }
 
