@@ -331,7 +331,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             command.Parameters.AddWithValue("@project_id", projectId.ToString());
             
             connection.Open();
-            logger.LogDebug("Executing: {command}", "DELETE FROM projects WHERE project_id = @project_id;");
+            logger.LogDebug("Executing: {command}", "DELETE FROM project_technologies WHERE project_id = @project_id;");
             command.ExecuteNonQuery();
             connection.Close();
         }
@@ -392,6 +392,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             connection.Close();
 
             Unjoin(project.Id);
+            InsertTechnologies(project.Technologies);
             Join(project.Id, project.Technologies);
 
             UpdateShortDescriptions(project.ShortDescriptions, project.Id);
