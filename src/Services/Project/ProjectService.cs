@@ -35,6 +35,11 @@ public class ProjectService : IProjectService
         return repository.FindAllFavorites();
     }
 
+    public IEnumerable<Project> GetAllNotFavoriteProjects()
+    {
+      return repository.FindAllNotFavorites();
+    }
+
     public IEnumerable<Project> GetAllProjects()
     {
         return repository.FindAll();

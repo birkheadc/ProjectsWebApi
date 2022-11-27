@@ -49,6 +49,21 @@ public class ProjectController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("not_favorites")]
+    public IActionResult GetNotFavorites()
+    {
+      try
+      {
+        return Ok(service.GetAllNotFavoriteProjects());
+      }
+      catch (Exception ex)
+      {
+        logger.LogWarning(ex, "Exception when attempting to process request GetFavorites.");
+        return BadRequest("Something went wrong!");
+      }
+    }
+
     [HttpPost]
     [Route("populate")]
     [PasswordAuth]

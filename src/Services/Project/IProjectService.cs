@@ -6,6 +6,7 @@ public interface IProjectService
 {
     public IEnumerable<Project> GetAllProjects();
     public IEnumerable<Project> GetAllFavoriteProjects();
+    public IEnumerable<Project> GetAllNotFavoriteProjects();
     public void AddProject(ProjectIncoming project);
     public void AddProjects(IEnumerable<ProjectIncoming> projects);
     public void DeleteProjectById(Guid id);
