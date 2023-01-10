@@ -291,12 +291,12 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            command.CommandText = $"INSERT INTO projects (project_id, project_name, site, source, is_favorite) values (@id, @name, @site, @source, @isFavorite)";
+            command.CommandText = $"INSERT INTO projects (project_id, project_name, site, source, favorite_level) values (@id, @name, @site, @source, @favoriteLevel)";
             command.Parameters.AddWithValue("@id", project.Id);
             command.Parameters.AddWithValue("@name", project.Name);
             command.Parameters.AddWithValue("@site", project.Site);
             command.Parameters.AddWithValue("@source", project.Source);
-            command.Parameters.AddWithValue("@isFavorite", project.IsFavorite ? 1 : 0);
+            command.Parameters.AddWithValue("@isFavorite", project.FavoriteLevel);
 
             connection.Open();
             command.ExecuteNonQuery();
@@ -362,7 +362,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             // Descriptions and Technologies are built later
             Site = reader["site"].ToString() ?? "",
             Source = reader["source"].ToString() ?? "",
-            IsFavorite = Boolean.Parse(reader["is_favorite"].ToString())
+            FavoriteLevel = long.Parse(reader["favorite_level"].ToString())
         };
         return project;
     }
@@ -395,11 +395,11 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            command.CommandText = "UPDATE projects SET project_name = @name, site = @site, source = @source, is_favorite = @fav WHERE project_id = @id";
+            command.CommandText = "UPDATE projects SET project_name = @name, site = @site, source = @source, favorite_level = @favoriteLevel WHERE project_id = @id";
             command.Parameters.AddWithValue("@name", project.Name);
             command.Parameters.AddWithValue("@site", project.Site);
             command.Parameters.AddWithValue("@source", project.Source);
-            command.Parameters.AddWithValue("@fav", project.IsFavorite ? 1 : 0);
+            command.Parameters.AddWithValue("@fav", project.FavoriteLevel);
             command.Parameters.AddWithValue("@id", project.Id.ToString());
 
             connection.Open();

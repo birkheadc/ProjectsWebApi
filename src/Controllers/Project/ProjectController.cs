@@ -34,35 +34,35 @@ public class ProjectController : ControllerBase
         }
     }
 
-    [HttpGet]
-    [Route("favorites")]
-    public IActionResult GetFavorites()
-    {
-        try
-        {
-            return Ok(service.GetAllFavoriteProjects());
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Exception when attempting to process request GetFavorites.");
-            return BadRequest("Something went wrong!");
-        }
-    }
+    // [HttpGet]
+    // [Route("favorites")]
+    // public IActionResult GetFavorites()
+    // {
+    //     try
+    //     {
+    //         return Ok(service.GetAllFavoriteProjects());
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         logger.LogWarning(ex, "Exception when attempting to process request GetFavorites.");
+    //         return BadRequest("Something went wrong!");
+    //     }
+    // }
 
-    [HttpGet]
-    [Route("not_favorites")]
-    public IActionResult GetNotFavorites()
-    {
-      try
-      {
-        return Ok(service.GetAllNotFavoriteProjects());
-      }
-      catch (Exception ex)
-      {
-        logger.LogWarning(ex, "Exception when attempting to process request GetFavorites.");
-        return BadRequest("Something went wrong!");
-      }
-    }
+    // [HttpGet]
+    // [Route("not_favorites")]
+    // public IActionResult GetNotFavorites()
+    // {
+    //   try
+    //   {
+    //     return Ok(service.GetAllNotFavoriteProjects());
+    //   }
+    //   catch (Exception ex)
+    //   {
+    //     logger.LogWarning(ex, "Exception when attempting to process request GetFavorites.");
+    //     return BadRequest("Something went wrong!");
+    //   }
+    // }
 
     [HttpPost]
     [Route("populate")]

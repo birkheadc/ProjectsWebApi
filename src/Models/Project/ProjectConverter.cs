@@ -13,7 +13,7 @@ public static class ProjectConverter
             Technologies = incoming.Technologies,
             Site = incoming.Site,
             Source = incoming.Source,
-            IsFavorite = incoming.IsFavorite
+            FavoriteLevel = incoming.FavoriteLevel
         };
         return project;
     }

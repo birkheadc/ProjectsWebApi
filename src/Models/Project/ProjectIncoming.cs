@@ -17,7 +17,7 @@ public record ProjectIncoming
     ///<summary>Link to the source code for the project.</summary>
     public string Source { get; set; }
     ///<summary>Whether the project is marked favorite or not.</summary>
-    public bool IsFavorite { get; set; }
+    public long FavoriteLevel { get; set; }
 
     public override string ToString()
     {
