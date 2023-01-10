@@ -5,11 +5,7 @@ namespace ProjectsWebApi.Repositories;
 public interface IProjectRepository
 {
     ///<summary>Returns all Projects in the database.</summary>
-    public IEnumerable<Project> FindAll(Trinary favoriteOnly = Trinary.BOTH);
-    ///<summary>Returns all Projects where IsFavorite is True.</summary>
-    public IEnumerable<Project> FindAllFavorites();
-    ///<summary>Returns all Projects where IsFavorite is False.</summary>
-    public IEnumerable<Project> FindAllNotFavorites();
+    public IEnumerable<Project> FindAll();
     ///<summary>Add a single Project to the database.</summary>
     public void Insert(Project project);
     ///<summary>Add multiple Projects to the database. This simply calls Insert in a foreach loop, so is not any more optimal than calling Insert manually.</summary>

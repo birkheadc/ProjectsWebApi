@@ -30,16 +30,6 @@ public class ProjectService : IProjectService
         repository.DeleteById(id);
     }
 
-    public IEnumerable<Project> GetAllFavoriteProjects()
-    {
-        return repository.FindAllFavorites();
-    }
-
-    public IEnumerable<Project> GetAllNotFavoriteProjects()
-    {
-      return repository.FindAllNotFavorites();
-    }
-
     public IEnumerable<Project> GetAllProjects()
     {
         return repository.FindAll();

@@ -11,7 +11,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         InitializeTables(tableSchemasConfiguration.TableSchemas["Projects"]);
     }
 
-    public IEnumerable<Project> FindAll(Trinary favoriteOnly = Trinary.BOTH)
+    public IEnumerable<Project> FindAll()
     {
         List<Project> projects = new();
 
@@ -19,18 +19,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         {
             MySqlCommand command = new();
             command.Connection = connection;
-            if (favoriteOnly == Trinary.TRUE)
-            {
-              command.CommandText = "SELECT * FROM projects WHERE is_favorite = 1";
-            }
-            else if (favoriteOnly == Trinary.FALSE)
-            {
-              command.CommandText = "SELECT * FROM projects WHERE is_favorite = 0";
-            }
-            else
-            {
-              command.CommandText = "SELECT * FROM projects";
-            }
+            command.CommandText = "SELECT * FROM projects";
 
             connection.Open();
             using (MySqlDataReader reader = command.ExecuteReader())
@@ -52,16 +41,6 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
         }
 
         return projects;
-    }
-
-    public IEnumerable<Project> FindAllFavorites()
-    {
-        return FindAll(Trinary.TRUE);
-    }
-
-    public IEnumerable<Project> FindAllNotFavorites()
-    {
-      return FindAll(Trinary.FALSE);
     }
 
     private string[] FindAllTechnologiesOfProject(Guid projectId)

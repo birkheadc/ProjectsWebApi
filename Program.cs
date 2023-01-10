@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Configuration;
+using ProjectsWebApi.Config;
 using ProjectsWebApi.Repositories;
 using ProjectsWebApi.Services;
 using Serilog;
@@ -32,16 +33,33 @@ else
     };
 }
 
+JwtConfig jwtConfig;
+if (builder.Environment.IsDevelopment())
+{
+  jwtConfig = builder.Configuration.GetSection("JwtConfig").Get<JwtConfig>();
+}
+else
+{
+  jwtConfig = new JwtConfig()
+  {
+    Key = Environment.GetEnvironmentVariable("ASPNETCORE_JWT_KEY")
+  };
+}
+
 // Build TableSchemasConfiguration
 TableSchemasConfiguration schemasConfiguration = builder.Configuration.GetSection("TableSchemasConfiguration").Get<TableSchemasConfiguration>();
 
 var services = builder.Services;
 
+services.AddSingleton(jwtConfig);
 services.AddSingleton(connectionConfig);
 services.AddSingleton(schemasConfiguration);
 
 services.AddScoped<IProjectService, ProjectService>();
 services.AddScoped<IProjectRepository, ProjectRepository>();
+services.AddScoped<ISessionService, SessionService>();
+services.AddScoped<IPasswordService, PasswordService>();
+services.AddScoped<IPasswordRepository, PasswordRepository>();
 
 services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

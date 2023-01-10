@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using ProjectsWebApi.Services;
 
 namespace ProjectsWebApi.Filters;
 
@@ -16,8 +17,8 @@ public class PasswordAuthAttribute : Attribute, IAsyncActionFilter
         }
 
         // Refuse access if password is included but is wrong.
-
-        if (DoesPasswordMatch(password) == false)
+        IPasswordService passwordService = context.HttpContext.RequestServices.GetRequiredService<IPasswordService>();
+        if (passwordService.IsPasswordCorrect(password) == false)
         {
             context.Result = new UnauthorizedResult();
             return;
@@ -25,15 +26,5 @@ public class PasswordAuthAttribute : Attribute, IAsyncActionFilter
 
         // Allow access if password matches.
         await next();
-    }
-
-    private bool DoesPasswordMatch(string password)
-    {
-        string correct = Environment.GetEnvironmentVariable("ASPNETCORE_PASSWORD");
-        if (correct is null || correct == password)
-        {
-            return true;
-        }
-        return false;
     }
 }
