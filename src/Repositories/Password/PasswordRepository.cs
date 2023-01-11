@@ -16,8 +16,16 @@ public class PasswordRepository : RepositoryBase, IPasswordRepository
       MySqlCommand command = new();
       command.Connection = connection;
       command.CommandText = "SELECT * FROM password LIMIT 1;";
+      connection.Open();
+      using (MySqlDataReader reader = command.ExecuteReader())
+      {
+        if (reader.Read())
+        {
+          return reader["password"].ToString();
+        }
+        return "";
+      }
     }
-    return "null";
   }
 
   public void SetPassword(string password)
@@ -26,7 +34,26 @@ public class PasswordRepository : RepositoryBase, IPasswordRepository
     {
       MySqlCommand command = new();
       command.Connection = connection;
+      command.CommandText = "INSERT INTO password (password) VALUES (@password);";
+      command.Parameters.AddWithValue("@password", password);
+      
+      connection.Open();
+      command.ExecuteNonQuery();
+      connection.Close();
+    } 
+  }
+
+  private void ClearPassword()
+  {
+    using (MySqlConnection connection = GetConnection())
+    {
+      MySqlCommand command = new();
+      command.Connection = connection;
       command.CommandText = "DELETE FROM password;";
+
+      connection.Open();
+      command.ExecuteNonQuery();
+      connection.Close();
     } 
   }
 }

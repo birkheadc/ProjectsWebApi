@@ -9,11 +9,17 @@ public class PasswordService : IPasswordService
   public PasswordService(IPasswordRepository passwordRepository)
   {
     this.passwordRepository = passwordRepository;
+    string password = passwordRepository.GetPassword();
+    if (password == "")
+    {
+      ChangePassword(Environment.GetEnvironmentVariable("ASPNETCORE_PASSWORD") ?? "_");
+    }
   }
 
   public void ChangePassword(string newPassword)
   {
-    throw new NotImplementedException();
+    string hash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+    passwordRepository.SetPassword(hash);
   }
 
   public bool IsPasswordCorrect(string password)
