@@ -275,7 +275,7 @@ public class ProjectRepository : RepositoryBase, IProjectRepository
             command.Parameters.AddWithValue("@name", project.Name);
             command.Parameters.AddWithValue("@site", project.Site);
             command.Parameters.AddWithValue("@source", project.Source);
-            command.Parameters.AddWithValue("@isFavorite", project.FavoriteLevel);
+            command.Parameters.AddWithValue("@favoriteLevel", project.FavoriteLevel);
 
             connection.Open();
             command.ExecuteNonQuery();

@@ -66,7 +66,7 @@ public class ProjectController : ControllerBase
 
     [HttpPost]
     [Route("populate")]
-    [PasswordAuth]
+    [TokenAuth]
     public IActionResult DEBUG_Populate()
     {
         if (env.IsDevelopment() == false)
@@ -166,8 +166,8 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPost]
-    [PasswordAuth]
-    public IActionResult InsertProject(ProjectIncoming project)
+    [TokenAuth]
+    public IActionResult InsertProject([FromBody] ProjectIncoming project)
     {
         try
         {
@@ -182,7 +182,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpDelete]
-    [PasswordAuth]
+    [TokenAuth]
     [Route("{id}")]
     public IActionResult DeleteProject([FromRoute (Name = "id")] string id)
     {
@@ -208,7 +208,7 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPut]
-    [PasswordAuth]
+    [TokenAuth]
     public IActionResult UpdateProject(Project project)
     {
         try
